@@ -1,0 +1,34 @@
+name: energy-management
+
+services:
+  backend:
+    container_name: python
+    image: python:1.0.0
+    build:
+      context: ./.venv-backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./.venv-backend/app:/app/src
+      - ./energy_data.db:/app/energy_data.db
+    environment:
+      - DATABASE_URL=sqlite+aiosqlite:///./energy_data.db
+      - FRONTEND_URL=http://localhost:3000
+
+  frontend:
+    container_name: nextjs
+    image: nextjs:1.0.0
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=http://localhost:8000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    # depends_on:
+    #   - backend
